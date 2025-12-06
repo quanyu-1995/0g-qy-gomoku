@@ -1,0 +1,10 @@
+**/**/node_modules/
+**/**/artifacts/
+**/**/cache/
+**/.vscode/
+dist/
+**/**/.env
+.env.local
+npm-debug.log
+yarn-error.log
+coverage/

@@ -24,13 +24,12 @@ export const getBrokerBalance = async (signer: Wallet): Promise<string> => {
   try {
     const account = await broker.ledger.getLedger()
     // console.log('account', account)
-    const [balance, locked] = account.ledgerInfo
-    // console.log(`
-    //   Balance: ${ethers.formatEther(balance)} OG
-    //   Locked: ${ethers.formatEther(locked)} OG
-    //   Available: ${ethers.formatEther(balance - locked)} OG
-    // `);
-    return ethers.formatEther(account.ledgerInfo?.[0] ?? 0)
+    const [balance, locked] = account;
+    console.log(`
+      Balance: ${ethers.formatEther(balance)} OG
+      Locked: ${ethers.formatEther(locked)} OG
+    `);
+    return ethers.formatEther(balance?.[0] ?? 0)
   }
   catch (e: any) {
     const reason = e?.revert?.name || e?.error?.data || e?.shortMessage
@@ -94,12 +93,12 @@ export const askLLM = async (
     baseURL: endpoint,
     apiKey: '',
   })
-  // console.log('--------------------------------------------------')
-  // console.log('tools', tools)
-  // console.log('providerAddress', providerAddress)
-  // console.log('history:', history)
-  // console.log('messages', messages)
-  // console.log('--------------------------------------------------')
+  console.log('--------------------------------------------------')
+  console.log('tools', tools)
+  console.log('providerAddress', providerAddress)
+  console.log('history:', history)
+  console.log('messages', messages)
+  console.log('--------------------------------------------------')
   const stream = await openai.chat.completions.create(
     {
       messages,

@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>粉丝数分布对比</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 1080px; margin: 20px auto; }
+    h1 { text-align: center; margin-bottom: 0px; }
+
+    .chart-group {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px 10px;
+      margin-bottom: 20px;
+    }
+
+    .chart-container {
+      flex: 1 1 48%;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 6px;
+      background: #fafafa;
+    }
+
+    .charts-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
+
+    .pie-chart {
+      width: 250px !important;
+      height: 250px !important;
+    }
+
+    .bar-chart {
+      width: 350px !important;
+      height: 180px !important;
+    }
+  </style>
+</head>
+<body>
+  <h1>粉丝数分布对比（3个月 vs 7天 vs 30天）</h1>
+
+  <div class="chart-group">
+  
+    <div class="chart-container">
+      <h2>0G 7天榜占比 (最少粉丝数: 1956，粉丝数小于3000人数: 3)</h2>
+      <div class="charts-row">
+        <canvas id="pieChart0" class="pie-chart"></canvas>
+        <canvas id="barChart0" class="bar-chart"></canvas>
+      </div>
+    </div>
+    <div class="chart-container">
+      <h2>0G 30天榜占比 (最少粉丝数: 1512，粉丝数小于3000人数: 3)</h2>
+      <div class="charts-row">
+        <canvas id="pieChart1" class="pie-chart"></canvas>
+        <canvas id="barChart1" class="bar-chart"></canvas>
+      </div>
+    </div>
+    <div class="chart-container">
+      <h2>0G 3个月榜占比 (最少粉丝数: 1512，粉丝数小于3000人数: 2)</h2>
+      <div class="charts-row">
+        <canvas id="pieChart2" class="pie-chart"></canvas>
+        <canvas id="barChart2" class="bar-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const statsArr = [{"max":330577,"min":1956,"lessThan3000Count":3,"ranges":[{"name":"0-1000","min":0,"max":1000,"count":0,"percent":"0.00"},{"name":"1000-2000","min":1000,"max":2000,"count":1,"percent":"1.05"},{"name":"2000-3000","min":2000,"max":3000,"count":2,"percent":"2.11"},{"name":"3000-5000","min":3000,"max":5000,"count":4,"percent":"4.21"},{"name":"5000-10000","min":5000,"max":10000,"count":5,"percent":"5.26"},{"name":"10000-20000","min":10000,"max":20000,"count":12,"percent":"12.63"},{"name":"20000-50000","min":20000,"max":50000,"count":23,"percent":"24.21"},{"name":">50000","min":50000,"max":null,"count":48,"percent":"50.53"}],"histogram":[{"range":"0-1000","count":0},{"range":"1000-2000","count":1},{"range":"2000-3000","count":2},{"range":"3000-5000","count":4},{"range":"5000-10000","count":5},{"range":"10000-20000","count":12},{"range":"20000-50000","count":23},{"range":">50000","count":48}]},{"max":5828480,"min":1512,"lessThan3000Count":3,"ranges":[{"name":"0-1000","min":0,"max":1000,"count":0,"percent":"0.00"},{"name":"1000-2000","min":1000,"max":2000,"count":1,"percent":"1.00"},{"name":"2000-3000","min":2000,"max":3000,"count":2,"percent":"2.00"},{"name":"3000-5000","min":3000,"max":5000,"count":5,"percent":"5.00"},{"name":"5000-10000","min":5000,"max":10000,"count":7,"percent":"7.00"},{"name":"10000-20000","min":10000,"max":20000,"count":12,"percent":"12.00"},{"name":"20000-50000","min":20000,"max":50000,"count":25,"percent":"25.00"},{"name":">50000","min":50000,"max":null,"count":48,"percent":"48.00"}],"histogram":[{"range":"0-1000","count":0},{"range":"1000-2000","count":1},{"range":"2000-3000","count":2},{"range":"3000-5000","count":5},{"range":"5000-10000","count":7},{"range":"10000-20000","count":12},{"range":"20000-50000","count":25},{"range":">50000","count":48}]},{"max":330550,"min":1512,"lessThan3000Count":2,"ranges":[{"name":"0-1000","min":0,"max":1000,"count":0,"percent":"0.00"},{"name":"1000-2000","min":1000,"max":2000,"count":1,"percent":"1.00"},{"name":"2000-3000","min":2000,"max":3000,"count":1,"percent":"1.00"},{"name":"3000-5000","min":3000,"max":5000,"count":4,"percent":"4.00"},{"name":"5000-10000","min":5000,"max":10000,"count":6,"percent":"6.00"},{"name":"10000-20000","min":10000,"max":20000,"count":11,"percent":"11.00"},{"name":"20000-50000","min":20000,"max":50000,"count":27,"percent":"27.00"},{"name":">50000","min":50000,"max":null,"count":50,"percent":"50.00"}],"histogram":[{"range":"0-1000","count":0},{"range":"1000-2000","count":1},{"range":"2000-3000","count":1},{"range":"3000-5000","count":4},{"range":"5000-10000","count":6},{"range":"10000-20000","count":11},{"range":"20000-50000","count":27},{"range":">50000","count":50}]}];
+
+  statsArr.forEach((stats, idx) => {
+    const pieCtx = document.getElementById('pieChart' + idx).getContext('2d');
+    const barCtx = document.getElementById('barChart' + idx).getContext('2d');
+
+    new Chart(pieCtx, {
+      type: 'pie',
+      data: {
+        labels: stats.ranges.map(r => r.name),
+        datasets: [{
+          label: '占比 (%)',
+          data: stats.ranges.map(r => r.percent),
+          backgroundColor: ['#e6194b', 
+          '#3cb44b',
+          '#ffe119',
+          '#4363d8', 
+          '#f58231', 
+          '#911eb4', 
+          '#46f0f0', 
+          '#f032e6' ]
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            align: 'center',
+            labels: {
+              boxWidth: 12,
+              padding: 6,
+              usePointStyle: true,
+            }
+          }
+        }
+      }
+    });
+
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: stats.histogram.map(h => h.range),
+          datasets: [{
+            label: '数量',
+            data: stats.histogram.map(h => h.count),
+            backgroundColor: '#36A2EB'
+          }]
+        },
+        options: {
+          responsive: false,
+          scales: { y: { beginAtZero: true } },
+          plugins: {
+            datalabels: {
+              anchor: 'end', // 标签位置：柱顶端
+              align: 'top',  // 标签对齐方式：顶部
+              font: {
+                weight: 'bold',
+                size: 12
+              },
+              color: '#000',
+              formatter: function(value) {
+                return value;  // 显示数据值
+              }
+            }
+          }
+        },
+        plugins: [ChartDataLabels]  // 引用插件
+      });
+  });
+</script>
+</body>
+</html>
+  

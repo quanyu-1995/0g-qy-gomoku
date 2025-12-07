@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import { auth } from './middleware/auth'
 import { llmService } from './service/llmService'
+import { isNotEmptyString } from './utils/is'
 
 dotenv.config();
 
@@ -27,6 +28,17 @@ router.get("/test", async (_req, res) => {
     const testResult = await llmService.test();
      res.send(`LLMService test result: ${testResult}`);
 });
+
+router.post('/session', async (req, res) => {
+  try {
+    const AUTH_SECRET_KEY = process.env.AUTH_SECRET_KEY
+    const hasAuth = isNotEmptyString(AUTH_SECRET_KEY)
+    res.send({ status: 'Success', message: '', data: { auth: hasAuth, model: '0GCompute' } })
+  }
+  catch (error) {
+    res.send({ status: 'Fail', message: error.message, data: null })
+  }
+})
 
 router.post('/llm/ask', auth, async (req, res) => {
   try {

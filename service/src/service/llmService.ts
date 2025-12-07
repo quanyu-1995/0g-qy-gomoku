@@ -6,8 +6,8 @@ import type OpenAI from 'openai'
 import { askLLM, fundBroker, getAvailableModels, getBrokerBalance } from '../utils/askLLM'
 import { handleToolCalls } from '../tools/toolExecutor'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-// import { ethers } from "ethers"
-// import { createZGComputeNetworkBroker } from '@0glabs/0g-serving-broker';
+import { ethers } from "ethers"
+import { createZGComputeNetworkBroker } from '@0glabs/0g-serving-broker';
 
 dotenv.config()
 
@@ -49,9 +49,9 @@ class LLMService {
 
       const peekedParts: any[] = []
       let hasToolCalls = false
-      let peekLimit = 3
-
-      while (peekLimit-- > 0) {
+      // let peekLimit = 3
+      while (true) {
+        console.log('Peeking into stream for tool_calls...');
         const { value, done } = await streamIter.next()
         if (done || !value)
           break
@@ -59,7 +59,7 @@ class LLMService {
         peekedParts.push(value)
 
         const delta = value.choices?.[0]?.delta
-        // console.log('delta', delta)
+        console.log('delta', delta)
         if (!delta)
           continue
 
@@ -69,7 +69,7 @@ class LLMService {
           break // 发现tool_calls，提前退出，交给handleFunctionCall处理
         }
       }
-      // console.log('hasToolCalls', hasToolCalls)
+      console.log('hasToolCalls', hasToolCalls)
       if (hasToolCalls)
         return await this.handleFunctionCall(messages, streamIter, peekedParts, input.provider)
 
@@ -121,7 +121,7 @@ class LLMService {
     provider: string,
   ) {
     let toolCalls: OpenAI.Chat.Completions.ChatCompletionToolCall[] | undefined
-
+    console.log('handleFunctionCall: peekedParts:', peekedParts);
     // 先把已读取的 peekedParts 拼接 tool_calls
     for (const part of peekedParts) {
       const delta = part.choices?.[0]?.delta
@@ -129,6 +129,7 @@ class LLMService {
         continue
 
       if (!toolCalls) {
+        console.log('handleFunctionCall: delta.tool_calls:', delta.tool_calls);
         toolCalls = delta.tool_calls.map(tc => ({
           ...tc,
           function: {
@@ -255,10 +256,9 @@ class LLMService {
   }
 
   async test() {
-    // const broker = await createZGComputeNetworkBroker(this.wallet)
-    // const account = await broker.ledger.getLedger();
-    // console.log(`Total Balance: ${ethers.formatEther(account.totalBalance)} 0G`);
-    // console.log(`Available: ${ethers.formatEther(account.availableBalance)} 0G`);
+    const broker = await createZGComputeNetworkBroker(this.wallet)
+    const account = await broker.ledger.getLedger();
+    console.log(`account : ${account}`);
     return await this.balance();
   }
 }
